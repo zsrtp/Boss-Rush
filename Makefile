@@ -37,7 +37,7 @@ else
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
-TARGET		:=	Rando.$(VERSION)
+TARGET		:=	BossRush.$(VERSION)
 BUILD		:=	build.$(VERSION)
 SOURCES		:=	source $(wildcard source/*) $(LIBTP)/source $(wildcard $(LIBTP)/source/*)
 DATA		:=	data
@@ -176,7 +176,7 @@ $(OFILES_SOURCES) : $(HFILES)
 
 %.gci: %.rel
 	@echo packing ... $(notdir $@)
-	@$(GCIPACK) $< "Custom REL File" "Twilight Princess" "($(PRINTVER)) Rando" $(BANNERFILE) $(ICONFILE) $(GAMECODE)
+	@$(GCIPACK) $< "Custom REL File" "Twilight Princess" "($(PRINTVER)) Boss Rush" $(BANNERFILE) $(ICONFILE) $(GAMECODE)
 
 #---------------------------------------------------------------------------------
 # This rule links in binary data with the .jpg extension
