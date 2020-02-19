@@ -1,0 +1,17 @@
+ook		0x1D:128 (ook)		0x16:16	(midna)
+diababa		0x13:2
+dangoro		0x1D:128		0x0A:64 (doors unlocked) 
+fyrus		0x1D:64			0x1D:8			
+deku toad	0x1D:128
+morpheel	0x1D:64
+death sword	0x1D:128		0x02:8 (spinner chest)
+stallord	0x1D:64
+dark hammer	0x1D:128
+blizetta	0x1D:64
+darknut		0x1D:128
+armogohma	0x1D:64
+arealfos	0x1D:128 		0x03:1 (double claw chest)
+argarok		0x1D:64
+phantom zant	0x17:16
+zant		0x1D:64
+ganon		(ending blow event)
