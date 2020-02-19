@@ -19,48 +19,13 @@ namespace mod
 {
     void main()
     {
-        // TEST
-        sprintf(libtp::display::print(15, ""), "AreaNodeAddr: %04x", (u32)&libtp::tp::d_com_inf_game::dComIfG_gameInfo.unk_958);
-
-        // END TEST
-
         console = new libtp::display::Console("AECX", "Boss Rush", "Fast paced fighting action, beat boss after boss",
                                               "as quickly as possible. At the end of each fight",
-                                              "you'll be teleported to the next one...", "Version: 0.2a");
+                                              "you'll be teleported to the next one...", "Version: 0.1b");
 
         // Hook to a suitable function
         // This one runs every frame
         onFrameDraw_Return = libtp::patch::hookFunction(libtp::tp::f_ap_game::fapGm_Execute, onFrameDraw);
-
-        createItemForPresentDemo_Return = libtp::patch::hookFunction(
-            libtp::tp::f_op_actor_mng::createItemForPresentDemo,
-            [](const float pos[3], s32 item, u8 unk3, s32 unk4, s32 unk5, const float unk6[3], const float unk7[3]) {
-                if (item == bossFights[currentBossFight].expectedItemID)
-                {
-                    currentBossFight++;
-                    bossFights[currentBossFight].preHook();
-                    // Go to next boss fight
-                    libtp::tools::triggerSaveLoad(bossFights[currentBossFight].stage, bossFights[currentBossFight].room,
-                                                  bossFights[currentBossFight].spawnpoint, bossFights[currentBossFight].state);
-                }
-
-                return createItemForPresentDemo_Return(pos, item, unk3, unk4, unk5, unk6, unk7);
-            });
-
-        createItemForTrBoxDemo_Return = libtp::patch::hookFunction(
-            libtp::tp::f_op_actor_mng::createItemForTrBoxDemo,
-            [](const float pos[3], s32 item, s32 unk3, s32 unk4, const float unk5[3], const float unk6[3]) {
-                if (item == bossFights[currentBossFight].expectedItemID)
-                {
-                    currentBossFight++;
-                    bossFights[currentBossFight].preHook();
-                    // Go to next boss fight
-                    libtp::tools::triggerSaveLoad(bossFights[currentBossFight].stage, bossFights[currentBossFight].room,
-                                                  bossFights[currentBossFight].spawnpoint, bossFights[currentBossFight].state);
-                }
-
-                return createItemForTrBoxDemo_Return(pos, item, unk3, unk4, unk5, unk6);
-            });
 
         onGanonFinish_Return = libtp::patch::hookFunction(libtp::tp::d_a_alink::procGanonFinish, onFinish);
 
@@ -147,6 +112,19 @@ namespace mod
 
             if (gameActive)
             {
+                // Check for events
+                bossFightInfo* boss = &bossFights[currentBossFight];
+                if ((libtp::tp::d_com_inf_game::dComIfG_gameInfo.localAreaNodes[boss->flagOffset] & boss->flagVar) ==
+                    boss->flagVar)
+                {
+                    // Desired flag has been reached, load next one
+                    currentBossFight++;
+                    boss = &bossFights[currentBossFight];
+
+                    boss->preHook();
+                    libtp::tools::triggerSaveLoad(boss->stage, boss->room, boss->spawnpoint, boss->state);
+                }
+
                 frameTimer++;
                 totalFrames++;
                 // Update every second to save some processing power
@@ -184,25 +162,19 @@ namespace mod
     // Prehooks
     void ook()
     {
-        // Give bottles
+        // Give bottles 2 * fairy tear
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xA7] = 115;
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xA8] = 115;
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xA9] = 115;
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xAA] = 115;
 
         // Item wheel bottles
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xB4 + itemWheelPos] = 11;
         itemWheelPos++;
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xB4 + itemWheelPos] = 12;
         itemWheelPos++;
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xB4 + itemWheelPos] = 13;
-        itemWheelPos++;
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xB4 + itemWheelPos] = 14;
-        itemWheelPos++;
 
-        // Give ending blow
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.eventBits[0x29] = 0xFF;
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.eventBits[0x2A] = 0xFF;
+        // Give ending blow only
+        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.eventBits[0x29] = 0x24;
+        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.eventBits[0x2A] = 0x00;
     }
     void diababa()
     {
@@ -240,9 +212,6 @@ namespace mod
 
     void morpheel()
     {
-        // Zora Armor inventory flag
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0x0D1] |= 0x2;
-
         // Add clawshot
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xA5] = 0x44;
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xB4 + itemWheelPos] = 0x9;
@@ -315,6 +284,10 @@ namespace mod
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xA6] = 0x47;
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xB4 + itemWheelPos] = 10;
         itemWheelPos++;
+    }
+    void phantomZant()
+    {
+        // Nothing I think
     }
     void zant()
     {
