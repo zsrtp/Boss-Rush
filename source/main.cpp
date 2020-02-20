@@ -300,7 +300,7 @@ namespace mod
     void zant()
     {
         // Light sword
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0x0D6] = 0xFF;
+        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xD6] = 0xFF;
     }
     void ganon()
     {
