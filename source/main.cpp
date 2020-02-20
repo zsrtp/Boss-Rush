@@ -9,6 +9,7 @@
 #include <tp/d_com_inf_game.h>
 #include <tp/f_ap_game.h>
 #include <tp/f_op_actor_mng.h>
+#include <tp/f_op_scene_req.h>
 #include <tp/m_do_controller_pad.h>
 
 #include <cstdint>
@@ -21,7 +22,7 @@ namespace mod
     {
         console = new libtp::display::Console("AECX", "Boss Rush", "Fast paced fighting action, beat boss after boss",
                                               "as quickly as possible. At the end of each fight",
-                                              "you'll be teleported to the next one...", "Version: 0.1b");
+                                              "you'll be teleported to the next one...", "Version: 0.2b");
 
         // Hook to a suitable function
         // This one runs every frame
@@ -112,10 +113,11 @@ namespace mod
 
             if (gameActive)
             {
-                // Check for events
+                // Check for events if not loading
                 bossFightInfo* boss = &bossFights[currentBossFight];
-                if ((libtp::tp::d_com_inf_game::dComIfG_gameInfo.localAreaNodes[boss->flagOffset] & boss->flagVar) ==
-                    boss->flagVar)
+                if (!libtp::tp::f_op_scene_req::isLoading && boss->flagVar > 0 &&
+                    ((libtp::tp::d_com_inf_game::dComIfG_gameInfo.localAreaNodes[boss->flagOffset] & boss->flagVar) ==
+                     boss->flagVar))
                 {
                     // Desired flag has been reached, load next one
                     currentBossFight++;
@@ -150,8 +152,9 @@ namespace mod
             if (HUD)
             {
                 sprintf(libtp::tp::jfw_system::systemConsole->consoleLine[5].line, "Boss: %d", currentBossFight + 1);
-                sprintf(libtp::tp::jfw_system::systemConsole->consoleLine[6].line, "Frames: %u", totalFrames);
-                sprintf(libtp::tp::jfw_system::systemConsole->consoleLine[7].line, "%02d:%02d:%02d", hours, minutes, seconds);
+                sprintf(libtp::tp::jfw_system::systemConsole->consoleLine[6].line, "%02d:%02d:%02d", hours, minutes, seconds);
+
+                sprintf(libtp::tp::jfw_system::systemConsole->consoleLine[24].line, "Frames: %u", totalFrames);
             }
         }
 
@@ -162,6 +165,11 @@ namespace mod
     // Prehooks
     void ook()
     {
+        // Give basic equip (heroe's cloths, za, ordon sword, shield)
+        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xD1] |= 2;  // ZA
+        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xD2] |=
+            (128 | 16 | 4 | 1);  // hero cloth, hylian shield, ordon shield, ordon sword
+
         // Give bottles 2 * fairy tear
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xA7] = 115;
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xA8] = 115;
@@ -239,7 +247,7 @@ namespace mod
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.eventBits[0x5] |= 0x1;
 
         // Set Master sword inventory flag
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0x0D2] |= 0x2;
+        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xD2] |= 0x2;
 
         // Equip Master sword (0x49 / 73)
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0x014] = 0x49;
