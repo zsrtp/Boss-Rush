@@ -22,7 +22,7 @@ namespace mod
     {
         console = new libtp::display::Console("AECX", "Boss Rush", "Fast paced fighting action, beat boss after boss",
                                               "as quickly as possible. At the end of each fight",
-                                              "you'll be teleported to the next one...", "Version: 0.2b");
+                                              "you'll be teleported to the next one...", "Version: 0.3b");
 
         // Hook to a suitable function
         // This one runs every frame
@@ -288,10 +288,23 @@ namespace mod
     }
     void argarok()
     {
-        // 2nd clawshot
+        // Purge old clawshot from items
+        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xA5] = 0xFF;
+
+        // Add 2nd clawshot to items
         libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xA6] = 0x47;
-        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xB4 + itemWheelPos] = 10;
-        itemWheelPos++;
+
+        // Set Double Clawshot into itemwheel position where clawshot was
+        libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xB4 + clawshotItemWheelIndex] = 0xA;
+
+        // Remove from X/Y equip
+        u8* x = &libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xB];
+        u8* y = &libtp::tp::d_com_inf_game::dComIfG_gameInfo.scratchPad.wQuestLogData[0xC];
+
+        if (*x == 9)
+            *x = 0xFF;
+        else if (*y == 9)
+            *y = 0xFF;
     }
     void phantomZant()
     {
